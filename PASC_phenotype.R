@@ -50,6 +50,10 @@ S.FUN <- function(yy, Yi, Di, yes.smooth = FALSE) {
 
 # ROC and AUC estimation from predicted probabilities
 ROC.Est.FUN <- function(Di, yyi, yy0, fpr0 = NULL, wgti = NULL, yes.smooth = FALSE) {
+  ## ROC function inputs:
+  ## - Di: vector of gold-standard labels (binary 0/1)
+  ## - yyi: vector of predicted disease scores (continuous 0-1)
+  ## - yy0: cutoff value for disease score to evaluate
   if (is.null(wgti)) wgti <- rep(1, length(Di))
   yyi <- as.matrix(yyi); pp <- ncol(yyi)
   mu0 <- sum(wgti * (1 - Di)) / sum(wgti); mu1 <- 1 - mu0
@@ -114,6 +118,9 @@ Est.ALASSO.GLM <- function(data, Wi = NULL, rtn = "EST", nopen.ind = NULL, regul
 #### =============================== ####
 
 generate_data <- function(n, p, seed = 123) {
+  # generate_data function inputs:
+  # - n: number of patients to simulate (n rows)
+  # - p: number of features to simualte (n cols)
   set.seed(seed)
   X <- matrix(rnorm(n * p), nrow = n)
   colnames(X) <- paste0("V", 1:p)
@@ -147,7 +154,14 @@ params <- list(
 xgb.model <- list(); xgb.pred0 <- NULL
 for (hospital.setting in c("allpat", "inpat", "outpat")) {
   for (period.setting in c("cotrain.ind", "12", "3")) {
-    feature.sel.keep <- paste0("V", 1:30)
+    
+    ### feature selection
+    ### optionally, you may conduct a separate feature selection analysis to 
+    ### subset the ehr features to the most important. enter the list of 
+    ### selected feature names as a character vector here. in this simulated
+    ### example, we simply choose an arbitrary set of 30 features.
+    feature.sel.keep <- paste0("V", 1:30) 
+    
     if (period.setting == "cotrain.ind") feature.sel.keep <- c("period12", feature.sel.keep)
     if (hospital.setting == "allpat") feature.sel.keep <- c("inpat", feature.sel.keep)
     
@@ -183,13 +197,30 @@ xgb.pred <- data.frame(
 #### 4. LOOCV WITH ADAPTIVE LASSO    ####
 #### =============================== ####
 
+### Align the cohort-specific xgboost probabilities
+# Note that you may tailor this step to the specifics of your project and data.
+# In this example, we show one example of how the alignment could be done:
+dat.ssl <- data.frame(
+  U099_Count = dat$U099_Count,
+  Y = dat$Y,
+  xgb.pred
+)
+dat.ssl <- dat.ssl %>% 
+  mutate(model.score = case_when(
+    period12==1 & inpat==1 ~ X12_inpat,
+    period12==1 & inpat==0 ~ X12_outpat,
+    period12==0 ~ X3_allpat
+))
+
 # Prepare labeled data for LOOCV
-ind.miss <- which(!is.na(dat$Y))
-Y <- dat$Y[ind.miss]
-dat$model.score <- xgb.pred$cotrain.ind_outpat
-S <- dat[ind.miss, c("u099.flag", "period12", "inpat", "U099_Count", "model.score")]
+ind.miss <- which(!is.na(dat.ssl$Y))
+Y <- dat.ssl$Y[ind.miss]
+S <- dat.ssl[ind.miss, c("u099.flag", "period12", "inpat", "U099_Count", "model.score")]
 
 ssl.pred.leave1out.fun <- function(Y, S, alg = "alasso") {
+  ## supervised model training function inputs:
+  ## - Y: vector of the gold-standard labels
+  ## - S: training features for the labeled patients
   data <- cbind(Y, S)
   ssl.pred <- rep(NA, length(Y))
   
@@ -206,7 +237,23 @@ ssl.pred.leave1out.fun <- function(Y, S, alg = "alasso") {
   return(ssl.pred)
 }
 
+# Run the supervised model step
 preds <- ssl.pred.leave1out.fun(Y, S, alg = "alasso")
 
 # Evaluate ROC
-ROC.Est.FUN(Y, preds, yy0 = 0.5)
+## ROC function inputs:
+## - Di: vector of gold-standard labels (binary 0/1)
+## - yyi: vector of predicted disease scores (continuous 0-1)
+## - yy0: cutoff value for disease score to evaluate
+result <- ROC.Est.FUN(Y, preds, yy0 = 0.9)
+names(result) <- c("auc", "cut", "p.pos", "fpr", "tpr", "ppv", "npv")
+result
+
+## ROC.Est.Fun outputs:
+## - auc: Area under Receiving Operator Curve
+## - cut: classification cutoff value for the predicted disease score
+## - p.pos: percent of labeled patients classified as positive cases using this cutoff value
+## - fpr: false positive rate
+## - tpr: true positive rate
+## - ppv: positive predictive value
+## - npv: negative predictive value
