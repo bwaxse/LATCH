@@ -1,5 +1,7 @@
 # PASC
 
+To apply the LATCH phenotype for Long Covid, you may either 1) train your own model or 2) apply the VA trained model. Below are the steps for option 1) train your own model. For option 2), see "apply_va_model" directory. 
+
 This repository contains the R code used in the paper **"Label Efficient Phenotyping for Long COVID using Electronic Health Records"**, which explores a semi-supervised learning framework for phenotyping Long COVID using electronic health record (EHR) data. The code simulates a hybrid learning setting, where a surrogate model is trained using XGBoost on proxy labels (namely U09.9 status) and then combined with gold-standard labels via adaptive LASSO with leave-one-out cross-validation (LOOCV).
 
 ---
