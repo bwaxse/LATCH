@@ -78,9 +78,10 @@ dat.ssl <- dat.ssl %>%
   ))
 
 ## Application of regression model
-#dat.ssl$ssl_ord=g.logit(0.6372599*log(dat.ssl$U099_Count+1)+0.2568035*dat.ssl$model.score)
-dat.ssl$ssl_who1=g.logit(1.4151418*log(dat.ssl$U099_Count+1)+0.301594*dat.ssl$model.score)
-dat.ssl$ssl_who=g.logit(1.0843817*log(dat.ssl$U099_Count+1)+0.3055942*dat.ssl$model.score)
+dat.ssl$ssl_ord=g.logit(0.6372599*log(dat.ssl$U099_Count+1)+0.2568035*dat.ssl$model.score)
+#dat.ssl$ssl_who1=g.logit(1.4151418*log(dat.ssl$U099_Count+1)+0.301594*dat.ssl$model.score)
+#dat.ssl$ssl_who=g.logit(1.0843817*log(dat.ssl$U099_Count+1)+0.3055942*dat.ssl$model.score)
+
 
 
 
