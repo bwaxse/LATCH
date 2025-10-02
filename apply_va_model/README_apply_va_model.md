@@ -26,13 +26,14 @@ These are listed in format like `m_X041` or `n_X840.3` in the .Rdata objects lis
 * To find ICD codes grouped to each PheCode, refer to the PheWas catalog: https://phewascatalog.org/phewas/#phe12
 * The `m_` and `n_` prefixes refer to counts curated as either
 	1. `n_` -- the count of distinct dates a new-onset feature appears post-COVID-19 infection (0-6 months after infection)
- 	 	\nExample: If PheCode 008.5 appears on 3 different dates → n_X008.5 = 3
-	2. `m_` -- the number of months (within 0-6 month window) in which a new-onset feature was observed at least once
-		\nExample: After infection Oct, 2022, PheCode 008.5 in Nov, 2022 and March, → m_X008.5 = 2
+ 2. 		Example: If PheCode 008.5 appears on 3 different dates → n_X008.5 = 3
+	3. `m_` -- the number of months (within 0-6 month window) in which a new-onset feature was observed at least once
+ 4. 		Example: After infection Oct, 2022, PheCode 008.5 in Nov, 2022 and March, → m_X008.5 = 2
 	
 ### Using the code template
 To run the `apply_va_phecode_model.r` script:
 * install R packages `dplyr` and `xgboost`
 * modify the paths in the script commented with "EDIT" flags to point to the correct paths and align model object names. 
 * run the R code. 
+
 
