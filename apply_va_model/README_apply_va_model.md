@@ -24,6 +24,7 @@ Your patient EHR feature data should be formatted in a table with the following 
 Feature names follow the format `m_X041` or `n_X840.3` in the .Rdata objects listed above under "codified feature names".
 * The number after "X" indicates the PheCode number (e.g., PheCode 041, PheCode 840.3)
 * For ICD codes mapped to each PheCode, refer to the PheWAS catalog: https://phewascatalog.org/phewas/#phe12
+
 **Feature Type Prefixes:**
 * **`n_`** — Count of distinct dates a new-onset feature appears post-COVID-19 (0-6 months after infection)
   * *Example:* If PheCode 008.5 appears on 3 different dates → `n_X008.5 = 3`
@@ -35,6 +36,7 @@ To run the `apply_va_phecode_model.r` script:
 * install R packages `dplyr` and `xgboost`
 * modify the paths in the script commented with "EDIT" flags to point to the correct paths and align model object names. 
 * run the R code. 
+
 
 
 
